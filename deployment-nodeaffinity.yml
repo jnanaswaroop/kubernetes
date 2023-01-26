@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat
+  namespace: devenvns
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tomcat
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      name: tomcat-nginix
+      labels:
+        app: tomcat
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: size
+                  operator: NotIn
+                  values:
+                    - small
+      containers:
+         - name: tomcat
+           image: ravindra45/ravindra45:1.1.1
