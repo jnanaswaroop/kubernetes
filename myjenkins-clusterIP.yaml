@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+spec:
+  replicas: 1
+  selector:
+   matchLabels:
+     app: jenkins
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      name: jenkins
+      labels:
+        app: jenkins
+    spec:
+      volumes:
+      - name: "jenkins-data"
+        hostPath:
+          path: "/root/jenkins"
+      securityContext:
+        fsGroup: 2000
+        runAsUser: 1000
+        runAsNonRoot: true
+      nodeSelector:
+        size: large
+      containers:
+      - name: jenkins
+        image: jenkins/jenkins:lts
+        env:
+        - name: JENKINS_OPTS
+          value: --prefix=/jenkins
+        volumeMounts:
+        - mountPath: "/var/jenkins_home"
+          name: "jenkins-data"
+        # A folder will be created in worker node labeled large after applying this yaml file, give permission 777 for that folder, jenkins-ingress file
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+spec:
+  selector:
+    app: jenkins
+  ports:
+    - name: jenkins
+      protocol: TCP
+      targetPort: 8080
+      port: 8080
