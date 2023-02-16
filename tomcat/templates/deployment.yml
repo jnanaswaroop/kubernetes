@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
-metadata:
-  name: tomcat
+metadata: 
+  name: {{ .Release.Name }}
 spec:
-  replicas: 2
+  replicas: {{ .Values.replicas }}
   selector:
-   matchLabels:
-     app: {{ .Values.selector_label }}
+    matchLabels: 
+      app: {{ .Values.selector_matchlabels }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 1     
+      maxUnavailable: 1
   template:
     metadata:
-      name: tomcat-nginx
+      name: {{ .Values.deployment_name }}
       labels:
-        app: {{ .Values.selector_label }}
+        app: {{ .Values.selector_matchlabels }}
     spec:
       containers:
-        - name: tomcat
-          image: krishna123456/tomcat:1.11.111
+      - name: {{ .Values.deployment_name }}
+        image: {{ .Values.registry_name }}/{{ .Values.docker_repo_name }}:{{ .Values.image_tag }}
 
